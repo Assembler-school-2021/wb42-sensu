@@ -288,15 +288,18 @@ Instalamos el plugin:
 
 Probamos los checks
 ```
-sudo /opt/sensu-plugins-ruby/embedded/bin/check-es-node-status.rb -h 95.216.200.57 -u elastic -P elastic -p 9200 --cert /etc/filebeat/elasticsearch-ca.pem -e
-sudo /opt/sensu-plugins-ruby/embedded/bin/check-es-file-descriptors.rb  -h 95.216.200.57 -u elastic -P elastic -p 9200 --cert /etc/filebeat/elasticsearch-ca.pem -e
-sudo /opt/sensu-plugins-ruby/embedded/bin/check-es-heap.rb  -h 95.216.200.57 -u elastic -P elastic -p 9200 --cert /etc/filebeat/elasticsearch-ca.pem -e
-sudo /opt/sensu-plugins-ruby/embedded/bin/check-es-cluster-health.rb  -h 95.216.200.57 -u elastic -P elastic -p 9200 --cert /etc/filebeat/elasticsearch-ca.pem -e
+export SSL_CERT_FILE=/etc/filebeat/elasticsearch-ca.pem
+/opt/sensu-plugins-ruby/embedded/bin/check-es-node-status.rb -h 95.216.200.57 -u elastic -P elastic -p 9200 --cert /etc/filebeat/elasticsearch-ca.pem -e
+/opt/sensu-plugins-ruby/embedded/bin/check-es-file-descriptors.rb  -h 95.216.200.57 -u elastic -P elastic -p 9200 --cert /etc/filebeat/elasticsearch-ca.pem -e
+/opt/sensu-plugins-ruby/embedded/bin/check-es-heap.rb  -h 95.216.200.57 -u elastic -W elastic -p 9200 --cert /etc/filebeat/elasticsearch-ca.pem -e -w 2000000000 -c 10000000000
+/opt/sensu-plugins-ruby/embedded/bin/check-es-cluster-health.rb  -h 95.216.200.57 -u elastic -P elastic -p 9200
 ```
 Y creamos los comandos:
 ```
 sensuctl check create elastic-status --command '/opt/sensu-plugins-ruby/embedded/bin/check-es-node-status.rb -h 95.216.200.57 -u elastic -P elastic -p 9200 --cert /etc/filebeat/elasticsearch-ca.pem -e' --interval 60 --handlers slack,pushover --subscriptions elastic
 sensuctl check create elastic-files --command '/opt/sensu-plugins-ruby/embedded/bin/check-es-file-descriptors.rb  -h 95.216.200.57 -u elastic -P elastic -p 9200 --cert /etc/filebeat/elasticsearch-ca.pem -e' --interval 60 --handlers slack,pushover --subscriptions elastic
+sensuctl check create elastic-heap --command '/opt/sensu-plugins-ruby/embedded/bin/check-es-heap.rb  -h 95.216.200.57 -u elastic -W elastic -p 9200 --cert /etc/filebeat/elasticsearch-ca.pem -e -w 2000000000 -c 10000000000' --interval 60 --handlers slack,pushover --subscriptions elastic
+sensuctl check create elastic-health --command 'export SSL_CERT_FILE=/etc/filebeat/elasticsearch-ca.pem; /opt/sensu-plugins-ruby/embedded/bin/check-es-cluster-health.rb  -h 95.216.200.57 -u elastic -P elastic -p 9200' --interval 60 --handlers slack,pushover --subscriptions elastic
 ```
 
 > Pregunta 4
