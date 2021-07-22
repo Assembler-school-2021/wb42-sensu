@@ -316,6 +316,16 @@ root@dog-sensu01:~# sensuctl check list | grep elastic
 > Pregunta 5
 > Instala ahora un psql y monitorizalo adecuadamente utilizando sensu.
 
+Instalamos el plugin de postgres:
+```
+sensu-install -P sensu-plugins-postgres
+```
+Y creamos el check:
+```
+sensuctl check create check-postgres --command '/opt/sensu-plugins-ruby/embedded/bin/check-postgres-alive.rb -u root -p mysecurepassword -h localhost -d sensudb' --interval 60 --handlers slack,pushover --subscriptions postgres
+
+```
+
 > Pregunta 6
 > Crea ahora un check para monitorizar la caducidad del dominio SSL de wordpress. Idealmente será critical cuando quede menos de un mes para su renovación.
 
