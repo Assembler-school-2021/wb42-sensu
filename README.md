@@ -329,6 +329,24 @@ sensuctl check create check-postgres --command '/opt/sensu-plugins-ruby/embedded
 > Pregunta 6
 > Crea ahora un check para monitorizar la caducidad del dominio SSL de wordpress. Idealmente será critical cuando quede menos de un mes para su renovación.
 
+Creamos un script de comprobación:
+```
+#!/bin/bash
+CERTEXPDATE=`date -d "$(openssl x509 -enddate -noout -in /etc/letsencrypt/live/sensu.devops-alumno08.com/fullchain.pem | cut -f2 -d=)"`
+ONEMONTHBEF=`date -d "$CERTEXPDATE -1 month" +%s`
+AHORA=`date +%s`
+if [ $AHORA -gt $ONEMONTHBEF ]; then
+	echo "WARNING Queda menos de un mes para que expire el certificado $CERTEXPDATE"
+	exit 1
+else
+	echo "GOOD Fecha de expiración $CERTEXPDATE"
+	exit 0
+fi
+```
+Y el comando de check:
+
+`sensuctl check create check-cert --command '/opt/sensu-plugins-ruby/embedded/bin/certexpire.sh' --interval 600 --handlers slack,pushover --subscriptions cert`
+
 > Pregunta 7
 > Crea ahora un handler personalizado para recibir las alertas y gestionar resoluciones automaticamente. Importante saber que estamos haciendo a la hora de declarar resoluciones.
 
